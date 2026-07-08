@@ -1,7 +1,7 @@
 ---
 name: job-scraper
 description: >
-  Scrapes Danish job sites for new positions matching your profile. Deduplicates across runs.
+  Searches job sites for new positions matching your profile. Defaults to WebSearch for Chinese portals (BOSS 直聘, 拉勾, 猎聘, 智联招聘, 前程无忧) and LinkedIn, since many Chinese boards block automated access. Deduplicates across runs.
   Triggers on: job scrape, find jobs, search jobs, new jobs, job search, scrape jobs, /scrape
 allowed-tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUserQuestion
 ---
@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUse
 
 ## How It Works
 
-This skill searches multiple Danish job sites using targeted queries based on your profile, deduplicates against previously seen jobs and the application tracker, and presents new matches with a quick fit assessment.
+This skill searches job sites using targeted queries based on your profile, deduplicates against previously seen jobs and the application tracker, and presents new matches with a quick fit assessment. For the Chinese market, it primarily uses **WebSearch** because major portals (BOSS 直聘, 拉勾, 猎聘, etc.) aggressively block scrapers. If you have installed optional portal CLI skills (e.g. `lagou-search`), the scraper can also call those.
 
 ## Invocation
 
@@ -23,7 +23,7 @@ The user triggers this skill by saying things like:
 - "/scrape"
 
 Optional arguments:
-- A focus area, e.g. "/scrape data science" or "/scrape geophysics"
+- A focus area, e.g. "/scrape backend" or "/scrape 算法"
 - "broad" to run all search categories, e.g. "/scrape broad"
 
 ---
@@ -40,12 +40,14 @@ Optional arguments:
 
 Run **WebSearch** queries from `search-queries.md`. By default, run the top 3 priority categories. If the user said "broad", run all categories.
 
-If the user specified a focus area (e.g. "data science"), prioritize queries from that category.
+If the user specified a focus area (e.g. "backend"), prioritize queries from that category.
 
 For each search:
-- Use `WebSearch` with site-specific queries (jobindex.dk, linkedin.com/jobs, karriere.dk, etc.)
-- Target your configured geographic area
+- Use `WebSearch` with site-specific queries (`site:zhipin.com`, `site:lagou.com`, `site:liepin.com`, `site:linkedin.com/jobs`, etc.)
+- Target your configured geographic area (Chinese cities)
 - Look for postings from the last 14 days
+
+If optional Chinese portal CLI skills are installed under `.agents/skills/` (e.g. `boss-search`, `lagou-search`, `liepin-search`), you may also run them here with the user's configured query and location flags. If they are not installed, rely entirely on WebSearch.
 
 ### Step 2: Fetch & Parse
 
@@ -54,6 +56,8 @@ For each promising result from Step 1:
 - Extract: **job title**, **company**, **location**, **posting date** (or "recent"), **URL**, **key requirements** (brief), **application deadline** (if listed)
 - Skip if the URL or company+title combo already exists in `seen_jobs.json`
 - Skip if the company+role already appears in `job_search_tracker.csv`
+
+**Note for Chinese portals:** if `WebFetch` returns a login/antibot page, record the URL in `seen_jobs.json` with status `blocked` and present only the title/company/snippet from the search result. Do not fabricate full details.
 
 ### Step 3: Quick Fit Assessment
 
@@ -75,7 +79,7 @@ For each new job, do a rapid fit check (NOT the full evaluation from `04-job-eva
       "url": "...",
       "first_seen": "YYYY-MM-DD",
       "fit": "high/medium/low",
-      "status": "new/skipped/evaluated/ranked/expired"
+      "status": "new/skipped/evaluated/ranked/expired/blocked"
     }
   }
 }
@@ -123,3 +127,4 @@ If the user decides to apply to any job, add a row to `job_search_tracker.csv`.
 4. **Only open positions.** Skip postings with expired deadlines or those marked as closed.
 5. **Be efficient with WebFetch.** Don't fetch every search result - use titles and snippets to pre-filter before fetching.
 6. **Parallel searches.** Use the Agent tool or parallel WebSearch calls to speed up the search phase.
+7. **Respect portal terms.** For Chinese job boards, do not aggressively scrape. Prefer low-volume WebSearch and user-provided URLs/descriptions.

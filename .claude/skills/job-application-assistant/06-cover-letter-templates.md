@@ -167,3 +167,57 @@ The font wrapper is mandatory — if you just move `\begin{itemize}` outside `\l
 - Export as PDF to preserve formatting
 - Name files clearly: "[Your Name] CV" and "[Your Name] Cover Letter"
 - Follow all employer instructions regarding anonymity or specific materials
+
+---
+
+## Chinese Cover Letter Template (for 中国求职市场)
+
+Use the Chinese cover letter template when applying to mainland Chinese companies.
+
+**Template file:** `cover_letters/chinese/cover.tex`
+**Compile with:** `xelatex` or `lualatex` (required for `ctex`).
+**Recommended compile command:**
+```bash
+cd cover_letters/chinese && xelatex -interaction=nonstopmode cover.tex
+```
+
+### Structure
+
+1. **Header** - Name, email, phone, LinkedIn/GitHub (optional), WeChat (optional).
+2. **Date** - Right-aligned `\today` or explicit date.
+3. **Salutation** - `尊敬的 [招聘负责人 / HR / 具体姓名]：`
+4. **Opening** - State the role, where you found it, and your core fit in 2-3 sentences.
+5. **Body** - 2-3 paragraphs:
+   - Relevant experience and achievements (use bullets for concrete results)
+   - Why this company / team / product specifically
+   - How your skills map to the role
+6. **Closing** - `期待能有机会参加面试...`
+7. **Sign-off** - `此致\\敬礼` followed by right-aligned signature.
+
+### Length
+
+- Hard 1-page A4 limit.
+- Target 300-400 Chinese characters for the body.
+- Chinese cover letters are generally shorter and more formal than English ones.
+
+### Salutation guidelines
+
+- If the hiring manager's name is known: `尊敬的 [姓氏] [职位]：`
+- Generic: `尊敬的招聘负责人：`
+- Avoid: `致相关人士` (too cold) unless absolutely no alternative.
+
+### Tone
+
+- Formal but not stiff.
+- Emphasize concrete contributions and quantified results.
+- Show knowledge of the company without excessive flattery.
+- Do not use em-dashes or overly casual expressions.
+
+### Font troubleshooting
+
+If `ctex` cannot find a Chinese font, specify a fontset in the document class:
+```latex
+\documentclass[fontset=mac]{ctexart}     % macOS
+\documentclass[fontset=windows]{ctexart} % Windows
+\documentclass[fontset=fandol]{ctexart}  % TeX Live fallback
+```

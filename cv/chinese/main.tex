@@ -1,0 +1,176 @@
+%% 中文简历模板 - [YOUR_NAME]
+%% 适用于中国求职市场，A4 纸张，两页限制
+%%
+%% SETUP: 运行 /setup 填写个人信息。
+%% 编译命令：cd cv/chinese && lualatex -interaction=nonstopmode main.tex
+%% 或：xelatex -interaction=nonstopmode main.tex
+%%
+%% 中文字体依赖：
+%% - macOS: 建议使用 MacTeX，系统自带苹方/华文黑体
+%% - Windows: 建议使用 MiKTeX/TeX Live，系统自带 SimHei/SimSun
+%% - Linux: 建议安装 fonts-noto-cjk (Noto Sans CJK SC)
+%% 如果编译报字体错误，请将下面 \setCJKmainfont 等改为系统已有的中文字体。
+
+\documentclass[11pt,a4paper,sans]{moderncv}
+\moderncvstyle{banking}
+\moderncvcolor{blue}
+
+% 强制姓名与章节标题使用 moderncv 强调色（蓝色）
+\renewcommand*{\firstnamestyle}[1]{{\fontsize{34}{36}\bfseries\upshape\color{color1}#1}}
+\renewcommand*{\lastnamestyle}[1]{{\fontsize{34}{36}\bfseries\upshape\color{color1}#1}}
+\renewcommand*{\sectionstyle}[1]{{\sectionfont\color{color1}#1}}
+
+\usepackage[utf8]{inputenc}
+\usepackage{ctex}
+
+% 如果系统能自动识别中文字体，可保留默认；否则取消下面注释并指定字体
+% \setCJKmainfont{PingFang SC}       % macOS 示例
+% \setCJKsansfont{PingFang SC}
+% \setCJKmonofont{PingFang SC}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=blue,
+    pdftitle={[YOUR_NAME] - 简历},
+    pdfpagemode=FullScreen,
+}
+\usepackage[scale=0.77]{geometry}
+\usepackage{import}
+\usepackage{needspace}
+
+% 个人信息
+% 中文姓名通常放在姓名字段；如只有一个字段，可填入 \name{[姓名]}{}
+\name{[姓名]}{}
+\phone[mobile]{[手机号码]}
+\email{[邮箱地址]}
+\extrainfo{\href{[LinkedIn或GitHub链接]}{LinkedIn / GitHub} | 微信：[微信号]}
+
+\begin{document}
+
+\makecvtitle
+
+% ============================================================
+%     求职意向 / 个人简介
+% ============================================================
+
+\vspace{6pt}
+\small{[3-5 行个人简介，针对目标岗位定制。说明你的核心优势、关键技能、以及能为公司带来的价值。示例：具有 X 年互联网产品研发经验的软件工程师，擅长 Python / Go 后端开发与分布式系统设计，熟悉云原生技术栈。主导过日活百万级产品的核心模块开发，具备良好的跨团队协作与技术决策能力。]}
+
+% ============================================================
+%     核心优势 / 技能
+% ============================================================
+
+\section{核心优势}
+\vspace{1pt}
+\begin{itemize}
+\item \textbf{[技能类别 1]}: [具体技术栈/工具，如 Python、Go、Kubernetes、React 等]
+\item \textbf{[技能类别 2]}: [具体能力，如分布式系统、机器学习、数据工程等]
+\item \textbf{[技能类别 3]}: [领域专长，如金融科技、电商、SaaS 等]
+\item \textbf{[技能类别 4]}: [软技能，如团队管理、跨部门协作、技术方案设计等]
+\end{itemize}
+
+% ============================================================
+%     工作经历
+% ============================================================
+
+\section{工作经历}
+\vspace{3pt}
+\begin{itemize}
+
+% --- 最近一份工作 ---
+\item{\cventry{[YYYY--至今]}{[职位名称]}{[公司名称]}{[城市]}{}{
+\vspace{1pt}
+\begin{itemize}
+    \item [职责或成果 1 - 尽量量化，如“负责 XX 系统，支撑日均 X 万订单”]
+    \item [职责或成果 2]
+    \item [职责或成果 3]
+    \item [职责或成果 4]
+\end{itemize}}}
+
+\vspace{3pt}
+
+% --- 上一份工作 ---
+\item{\cventry{[YYYY--YYYY]}{[职位名称]}{[公司名称]}{[城市]}{}{
+\vspace{1pt}
+\begin{itemize}
+    \item [职责或成果 1]
+    \item [职责或成果 2]
+    \item [职责或成果 3]
+\end{itemize}}}
+
+\vspace{3pt}
+
+% --- 更早工作 ---
+\item{\cventry{[YYYY--YYYY]}{[职位名称]}{[公司名称]}{[城市]}{}{
+\vspace{1pt}
+\begin{itemize}
+    \item [职责或成果 1]
+    \item [职责或成果 2]
+\end{itemize}}}
+
+\end{itemize}
+
+% ============================================================
+%     项目经历（可选）
+% ============================================================
+
+\section{项目经历}
+\vspace{1pt}
+\begin{itemize}
+\item{\cventry{[YYYY--YYYY]}{[项目名称]}{[角色]}{[技术栈]}{}{
+\vspace{1pt}
+\begin{itemize}
+    \item [项目背景与个人贡献]
+    \item [量化成果]
+\end{itemize}}}
+\end{itemize}
+
+% ============================================================
+%     教育背景
+% ============================================================
+
+\section{教育背景}
+\vspace{1pt}
+\begin{itemize}
+\item{\cventry{[YYYY--YYYY]}{[学历 / 专业]}{[学校名称]}{[城市]}{}{
+\vspace{1pt}
+[主修课程或荣誉，可选]
+}}
+\end{itemize}
+
+% ============================================================
+%     技能清单
+% ============================================================
+
+\section{技能清单}
+\vspace{1pt}
+\begin{itemize}
+\item \textbf{编程语言}: [Python, Go, Java, TypeScript 等]
+\item \textbf{框架/工具}: [Kubernetes, Docker, React, Django 等]
+\item \textbf{语言}: [中文（母语）、英语（CET-6 / 流利）等]
+\end{itemize}
+
+% ============================================================
+%     证书与荣誉（可选）
+% ============================================================
+
+\section{证书与荣誉}
+\vspace{1pt}
+\begin{itemize}
+\item{\textbf{[证书/荣誉名称]} -- [颁发机构] ([年份])}
+\end{itemize}
+
+% ============================================================
+%     自我评价（可选）
+% ============================================================
+
+\section{自我评价}
+\vspace{1pt}
+\begin{itemize}
+\item [1-2 句话总结工作风格、职业素养或核心驱动力]
+\end{itemize}
+
+\end{document}

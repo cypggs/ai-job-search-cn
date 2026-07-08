@@ -4,10 +4,10 @@
 <!-- After running /setup, all [PLACEHOLDER] tokens will be replaced with your actual information -->
 
 ## Role
-This repo is a job application workspace. Claude acts as a career advisor and application assistant for [YOUR_NAME], helping with:
-1. **Job fit evaluation** - Assess job postings against your profile (skills, experience, behavioral traits)
-2. **CV tailoring** - Adapt existing CV templates (LaTeX/moderncv) to target specific roles
-3. **Cover letter writing** - Draft targeted cover letters using existing templates (LaTeX)
+This repo is a job application workspace for the **Chinese job market** (with fallback support for international roles). Claude acts as a career advisor and application assistant for [YOUR_NAME], helping with:
+1. **Job fit evaluation** - Assess job postings against your profile (skills, experience, behavioral traits, Chinese-market factors like 996/大小周/五险一金)
+2. **CV tailoring** - Adapt LaTeX CV templates to target specific roles, using the Chinese template for China-market postings
+3. **Cover letter writing** - Draft targeted cover letters using the appropriate language template
 4. **Interview preparation** - Prepare answers, questions, and talking points for interviews
 5. **Career strategy** - Advise on positioning and personal branding
 
@@ -17,10 +17,28 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 
 ### Identity
 - **Name:** [YOUR_NAME]
+- **Chinese Name:** [中文姓名]
 - **Location:** [YOUR_CITY], [YOUR_COUNTRY] ([YOUR_COMMUTE_CONSTRAINTS])
+- **Current City / 现居城市:** [城市]
+- **Phone:** [YOUR_PHONE]
+- **Email:** [YOUR_EMAIL]
+- **WeChat / 微信:** [微信号]
+- **LinkedIn headline:** "[YOUR_LINKEDIN_HEADLINE]"
 - **Languages:** [YOUR_LANGUAGES]
 - **Status:** [YOUR_EMPLOYMENT_STATUS]
-- **LinkedIn headline:** "[YOUR_LINKEDIN_HEADLINE]"
+- **Political Status / 政治面貌:** [政治面貌] (optional, for 国企/事业单位)
+- **Hometown / 籍贯:** [籍贯] (optional)
+- **Ethnicity / 民族:** [民族] (optional)
+
+### Job Search Preferences
+- **Target Role / 求职意向:** [目标岗位]
+- **Years of Experience / 工作年限:** [X 年]
+- **Expected Salary / 期望薪资:** [期望月薪/年薪范围]
+- **Current Salary / 当前薪资:** [当前薪资，可选]
+- **Availability / 到岗时间:** [一周内/一个月内/协商]
+- **Target Cities / 期望城市:** [城市1, 城市2]
+- **Work Mode / 工作方式:** [现场办公/远程/混合]
+- **Deal-breakers:** [DEALBREAKER_1]
 
 ### Education
 <!-- List your degrees, most recent first -->
@@ -77,17 +95,22 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 - [DEALBREAKER_2]
 
 ## Repo Structure
-- `cv/` - LaTeX CV variants (moderncv template, banking style)
-- `cover_letters/` - LaTeX cover letters (custom cover.cls template)
+- `cv/` - LaTeX CV variants (moderncv template, banking style; English/international)
+- `cv/chinese/` - 中文简历模板 (ctex + moderncv)
+- `cover_letters/` - LaTeX cover letters (custom cover.cls template; English/international)
+- `cover_letters/chinese/` - 中文求职信模板 (ctexart)
 - `.claude/skills/` - AI skill definitions for the application workflow
-- `.agents/skills/` - Job search CLI tools
+- `.agents/skills/` - Job search CLI tools (optional for Chinese market)
 
 ## Workflow for New Job Applications
 1. User provides a job posting (URL or text)
-2. **Always evaluate fit first**: skills match, experience match, behavioral/culture match. Present this assessment to the user before proceeding.
-3. If good fit: create targeted CV (`cv/main_<company>.tex`) and cover letter (`cover_letters/cover_<company>_<role>.tex`)
-4. **Verify both documents** (see Verification Checklist below)
-5. Prepare interview talking points based on the role requirements and your strengths
+2. Detect the target market: if the posting is in Chinese, targets a Chinese company, or uses Chinese salary conventions, treat it as a China-market application.
+3. **Always evaluate fit first**: skills match, experience match, behavioral/culture match, plus China-specific factors (schedule, 五险一金, contract type). Present this assessment to the user before proceeding.
+4. If good fit: create targeted CV and cover letter in the appropriate language/market:
+   - China market: `cv/chinese/main_<company>.tex` + `cover_letters/chinese/cover_<company>_<role>.tex`
+   - International: `cv/main_<company>.tex` + `cover_letters/cover_<company>_<role>.tex`
+5. **Verify both documents** (see Verification Checklist below)
+6. Prepare interview talking points based on the role requirements and your strengths
 
 **Important:** When mentioning agentic coding or AI tooling in CVs/cover letters, explicitly reference **Claude Code** by name.
 
@@ -107,8 +130,8 @@ After creating or updating a CV or cover letter, re-read the generated file and 
 - [ ] Nice-to-have requirements are highlighted where there is a match
 
 ### Consistency
-- [ ] CV follows the standard 2-page moderncv/banking format
-- [ ] Cover letter uses cover.cls template and established structure
+- [ ] CV follows the standard 2-page moderncv/banking format (or the 2-page Chinese moderncv+ctex format for China-market roles)
+- [ ] Cover letter uses the correct template: `cover.cls` for English/Danish, `cover_letters/chinese/cover.tex` structure for Chinese
 - [ ] Tone is consistent across CV and cover letter
 - [ ] No contradictions between CV and cover letter content
 
@@ -116,20 +139,21 @@ After creating or updating a CV or cover letter, re-read the generated file and 
 - [ ] No LaTeX syntax errors (balanced braces, correct commands)
 - [ ] No spelling or grammar errors
 - [ ] Agentic coding / AI tooling references mention **Claude Code** by name
-- [ ] Cover letter is addressed to the correct person (or "Dear Hiring Manager" if unknown)
+- [ ] Cover letter is addressed to the correct person (or "Dear Hiring Manager" / "尊敬的招聘负责人" if unknown)
 - [ ] Cover letter fits approximately one page
 
 ### Compiled PDF verification (MANDATORY - never skip)
 Both documents MUST be compiled and visually inspected via the Read tool on the PDF output. "Looks fine in the .tex" is not acceptable - LaTeX page-break decisions are unpredictable. Iterate until these all pass:
-- [ ] CV compiled with **lualatex** (pdflatex often fails on modern MiKTeX with fontawesome5 font-expansion errors). Cover letter compiled with **xelatex** (cover.cls requires fontspec).
+- [ ] CV compiled with **lualatex** for default templates, or **lualatex/xelatex** for Chinese templates (pdflatex often fails on modern MiKTeX with fontawesome5 font-expansion errors; Chinese templates require lualatex/xelatex for `ctex`). Cover letter compiled with **xelatex** for default templates, or **xelatex/lualatex** for Chinese templates.
 - [ ] **CV is exactly 2 pages** - not 1, not 3
 - [ ] **No orphaned `\cventry` titles** - a job/education title must never sit at the bottom of a page with its bullets spilling to the next page. Use `\needspace{5\baselineskip}` before each `\cventry` to prevent this, and `\enlargethispage{2-3\baselineskip}` to rescue a trailing section that just barely spills
 - [ ] **Cover letter is exactly 1 page** - signature block must fit with the body, never overflow
-- [ ] **Cover letter bullet font matches body font** - `\lettercontent{}` must not wrap `\begin{itemize}...\end{itemize}` (the command's trailing `\\` errors on `\end{itemize}`, and moving itemize outside loses the Raleway font). Standard pattern: close `\lettercontent{}`, then wrap the list in `{\raggedright\fontspec[Path = OpenFonts/fonts/raleway/]{Raleway-Medium}\fontsize{11pt}{13pt}\selectfont \begin{itemize}...\end{itemize}\par}`
+- [ ] **For default cover letter: bullet font matches body font** - `\lettercontent{}` must not wrap `\begin{itemize}...\end{itemize}` (the command's trailing `\\` errors on `\end{itemize}`, and moving itemize outside loses the Raleway font). Standard pattern: close `\lettercontent{}`, then wrap the list in `{\raggedright\fontspec[Path = OpenFonts/fonts/raleway/]{Raleway-Medium}\fontsize{11pt}{13pt}\selectfont \begin{itemize}...\end{itemize}\par}`
+- [ ] **For Chinese cover letter: Chinese characters render clearly, no tofu boxes or font fallback issues; Chinese cover letters use the `cover_letters/chinese/cover.tex` structure**
 
 ### ATS & keyword verification (CV)
 ATS parsers read the PDF's embedded text layer, not the rendered page. Extract it with `pdftotext -layout` and verify what a parser sees. `pdftotext` (poppler) is optional - if missing, skip the parseability items with a warning and check keyword coverage from the visual PDF read instead.
 - [ ] CV text layer extracts cleanly - no `(cid:*)` markers, `�` replacement characters, or text visible in the PDF but absent from the extraction
 - [ ] Email and phone appear as **literal text** in the extraction (icon-glyph noise like `MOBILE-ALT`/`Envelope` is harmless, but a contact detail carried only by an icon or hyperlink is invisible to ATS)
 - [ ] Reading order of the extracted text matches the visual order (single-column stock template is safe; multi-column custom templates are where this breaks)
-- [ ] Posting keywords covered or honestly absent - synonym-only matches tightened to the posting's exact term where truthfully applicable, keywords the profile genuinely supports added to experience bullets, genuine gaps left visible and **never stuffed**
+- [ ] Posting keywords covered or honestly absent - synonym-only matches tightened to the posting's exact term where truthfully applicable, keywords the profile genuinely supports added to experience bullets, genuine gaps left visible and **never stuffed**. For Chinese postings, verify that Chinese role titles, technical terms, and company names extract cleanly.

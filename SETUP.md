@@ -26,7 +26,7 @@ On Windows, `py --version` is often the most reliable check if `python` is not o
 
 ### Bun (for job search tools)
 
-The job portal CLIs (four Danish portals plus the country-agnostic LinkedIn tool) are written in TypeScript and run with Bun.
+Optional. The `linkedin-search` CLI and any portal-specific CLIs you scaffold with `/add-portal` are written in TypeScript and run with Bun. For the Chinese market, `/scrape` uses WebSearch by default, so Bun is only needed if you add custom portal CLIs.
 
 - macOS/Linux:
 
@@ -50,7 +50,14 @@ Install a LaTeX distribution to compile the generated `.tex` files to PDF:
 - **macOS:** [MacTeX](https://tug.org/mactex/)
 - **Linux:** `sudo apt install texlive-full` or `sudo dnf install texlive-scheme-full`
 
-The CV compiles with `lualatex` (pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors). The cover letter compiles with `xelatex` because `cover.cls` requires `fontspec` for its custom Lato/Raleway fonts.
+The default CV compiles with `lualatex` (pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors). The default cover letter compiles with `xelatex` because `cover.cls` requires `fontspec`.
+
+**Chinese templates** (`cv/chinese/main.tex`, `cover_letters/chinese/cover.tex`) use the `ctex` package and require `lualatex` or `xelatex`. pdflatex will fail. Make sure a Chinese font is available:
+- **macOS:** MacTeX includes 苹方/华文 fonts.
+- **Windows:** MiKTeX/TeX Live will use SimHei/SimSun.
+- **Linux:** install `fonts-noto-cjk` (Noto Sans CJK SC).
+
+If compilation fails with a CJK font error, edit the template to specify an installed font, e.g. `\setCJKmainfont{PingFang SC}` on macOS or `\setCJKmainfont{Noto Sans CJK SC}` on Linux.
 
 ### Optional: pdftotext (for the ATS check)
 
@@ -65,36 +72,35 @@ If `pdftotext` is missing, `/apply` skips the mechanical check with a warning an
 ## 2. Fork and clone
 
 ```bash
-gh repo fork MadsLorentzen/ai-job-search --clone
+gh repo fork cypggs/ai-job-search --clone
+# or fork from the upstream MadsLorentzen/ai-job-search and merge Chinese changes manually
 cd ai-job-search
 ```
 
 Or manually: fork on GitHub, then clone your fork.
 
-## 3. Install job search CLI dependencies
-Run these from the repository root.
+## 3. Install job search CLI dependencies (optional)
+
+For the Chinese market, `/scrape` uses WebSearch by default. You only need to install CLI tools if you plan to use `linkedin-search` or scaffold a custom portal CLI with `/add-portal`.
+
+Run these from the repository root if desired:
 
 - PowerShell:
 
 ```powershell
-$tools = @("jobbank-search", "jobdanmark-search", "jobindex-search", "jobnet-search", "linkedin-search")
-foreach ($tool in $tools) {
-  Set-Location ".agents/skills/$tool/cli"
-  bun install
-  Set-Location "..\..\..\.."
-}
+Set-Location ".agents/skills/linkedin-search/cli"
+bun install
+Set-Location "..\..\.."
 ```
 
 - Bash / zsh / Git Bash:
 ```bash
-for tool in jobbank-search jobdanmark-search jobindex-search jobnet-search linkedin-search; do
-  cd .agents/skills/$tool/cli && bun install && cd ../../../..
-done
+cd .agents/skills/linkedin-search/cli && bun install && cd ../../../..
 ```
 
 For `linkedin-search` the install is optional: it has zero runtime dependencies and runs with plain `bun`; `bun install` only pulls TypeScript dev types.
 
-If you're outside Denmark, you can generate an equivalent search skill for your local job board with `/add-portal` — it scaffolds the same CLI structure for any public portal and test-runs a live query before registering. See the "Job search tools" section in the README.
+If you want to add a portal-specific CLI for a Chinese job board that allows it, run `/add-portal` — it scaffolds the same CLI structure and test-runs a live query before registering. See the "Job search tools" section in the README.
 
 ## 4. Run the setup interview
 
@@ -129,6 +135,8 @@ All three paths produce the same result: fully populated profile files.
 | `05-cv-templates.md` | Profile statement templates for your background |
 | `07-interview-prep.md` | STAR examples from your experience |
 | `cv/main_example.tex` | Your LaTeX CV with actual details |
+| `cv/chinese/main.tex` | Chinese CV template with your details |
+| `cover_letters/chinese/cover.tex` | Chinese cover letter template |
 | `search-queries.md` | Job search queries for `/scrape` |
 
 ### Re-running setup
@@ -145,7 +153,7 @@ The `--section search` option is especially useful as your priorities evolve. It
 
 ## 5. Optional: Set up salary benchmarking
 
-If you have salary data (from a union, salary survey, Glassdoor, or personal research):
+If you have salary data (from a union, salary survey, Glassdoor, 脉脉, 看准网, or personal research):
 
 1. **Option A:** Create `salary_data.json` manually in the repo root (see `tools/README_SALARY_TOOL.md` for the format)
 2. **Option B:** Convert from Excel:
@@ -161,7 +169,7 @@ This creates `salary_data.json` which the `/apply` workflow uses for salary benc
 Find a job posting you're interested in, then:
 
 ```
-/apply https://jobindex.dk/job/1234567
+/apply https://www.zhipin.com/job/xxxxxxxx.html
 ```
 
 Or paste the job description directly:
@@ -169,6 +177,8 @@ Or paste the job description directly:
 ```
 /apply [paste job posting text here]
 ```
+
+For China-market postings, `/apply` generates Chinese CV and cover letter PDFs. For international postings, it uses the original English templates.
 
 Claude will:
 1. Evaluate the fit against your profile
@@ -181,6 +191,7 @@ Claude will:
 
 After `/apply` creates the LaTeX files:
 
+**International/English templates:**
 ```bash
 # Bash / zsh / Git Bash
 cd cv && lualatex main_<company>.tex && cd ..
@@ -193,7 +204,20 @@ Set-Location cv; lualatex main_<company>.tex; Set-Location ..
 Set-Location cover_letters; xelatex cover_<company>_<role>.tex; Set-Location ..
 ```
 
-These commands apply to the stock templates (moderncv CV, `cover.cls` cover letter). If you'd rather use your own LaTeX template, run `/add-template` — it captures the template's compile engine, fonts, style rules, and page limit, test-compiles it, and wires it into `/apply`. See the "LaTeX templates" section in the README.
+**Chinese templates:**
+```bash
+# Bash / zsh / Git Bash
+cd cv/chinese && lualatex main_<company>.tex && cd ../..
+cd cover_letters/chinese && xelatex cover_<company>_<role>.tex && cd ../..
+```
+
+```powershell
+# PowerShell
+Set-Location cv/chinese; lualatex main_<company>.tex; Set-Location ../..
+Set-Location cover_letters/chinese; xelatex cover_<company>_<role>.tex; Set-Location ../..
+```
+
+These commands apply to the stock templates. If you'd rather use your own LaTeX template, run `/add-template` — it captures the template's compile engine, fonts, style rules, and page limit, test-compiles it, and wires it into `/apply`. See the "LaTeX templates" section in the README.
 
 ## Troubleshooting
 
@@ -201,15 +225,18 @@ These commands apply to the stock templates (moderncv CV, `cover.cls` cover lett
 This is expected if you haven't set up salary benchmarking. The `/apply` workflow skips this step automatically.
 
 ### Job search CLI tools not working
-Make sure Bun is installed and you ran `bun install` in each CLI directory. The tools require network access to fetch job listings.
+For the Chinese market, `/scrape` uses WebSearch by default and does not require portal CLIs. If you installed optional CLIs, make sure Bun is installed and you ran `bun install` in the CLI directory.
 
 ### LaTeX compilation errors
-- CV: uses `lualatex` (pdflatex often fails on modern MiKTeX with `fontawesome5` font-expansion errors; lualatex handles the same sources cleanly)
-- Cover letter: uses `xelatex` (for custom fonts in `OpenFonts/fonts/`)
-- Make sure your LaTeX distribution includes the `moderncv` package
+- Default CV: uses `lualatex` (pdflatex often fails on modern MiKTeX with `fontawesome5` font-expansion errors; lualatex handles the same sources cleanly)
+- Default cover letter: uses `xelatex` (for custom fonts in `OpenFonts/fonts/`)
+- Chinese CV/cover letter: use `ctex` and require `lualatex` or `xelatex`; pdflatex will fail
+- Make sure your LaTeX distribution includes the `moderncv` and `ctex` packages
 
 ### Fonts not found in cover letter
-The cover letter template expects fonts in `cover_letters/OpenFonts/fonts/`. Make sure this directory exists and contains the Lato and Raleway font files.
+The default cover letter template expects fonts in `cover_letters/OpenFonts/fonts/`. Make sure this directory exists and contains the Lato and Raleway font files.
+
+For Chinese templates, if `ctex` cannot find a CJK font, specify a fontset in the document class or set `\setCJKmainfont` to an installed CJK font (see comments in the template).
 
 ### Stale `.claude/settings.local.json` from an older clone
 Shared Claude Code permissions now live in `.claude/settings.json` (scoped to `bun run` and `python salary_lookup.py`). Earlier versions of this repo committed a broader `.claude/settings.local.json` that pre-approved `Bash(curl:*)`, `Bash(python:*)` and `Bash(bun:*)`. If you cloned before that change, git leaves the old file behind in your working copy, and its permissions still apply on top of `settings.json`. Delete it (or trim it to your own personal overrides):

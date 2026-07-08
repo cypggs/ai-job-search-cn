@@ -1,0 +1,67 @@
+%% 中文求职信模板
+%% 适用于中国求职市场，A4 纸张，一页限制
+%%
+%% SETUP: 运行 /setup 填写个人信息。
+%% 编译命令：cd cover_letters/chinese && xelatex -interaction=nonstopmode cover.tex
+%% 或：lualatex -interaction=nonstopmode cover.tex
+%%
+%% 中文字体依赖：
+%% - macOS: 建议使用 MacTeX，系统自带苹方/华文黑体
+%% - Windows: 建议使用 MiKTeX/TeX Live，系统自带 SimHei/SimSun
+%% - Linux: 建议安装 fonts-noto-cjk (Noto Sans CJK SC)
+%% 如果编译报字体错误，请在 \documentclass 选项中指定 fontset，
+%% 例如：\documentclass[fontset=mac]{ctexart} 或 \documentclass[fontset=windows]{ctexart}
+
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\pagestyle{empty}
+
+% 自定义命令，保持与原版 cover.cls 类似的调用方式
+\newcommand{\namesection}[1]{%
+  \begin{center}
+    {\Huge\bfseries #1}\\[6pt]
+    {\normalsize [邮箱] | [手机] | \href{[LinkedIn/GitHub链接]}{LinkedIn / GitHub}}
+  \end{center}
+  \vspace{16pt}
+}
+
+\newcommand{\currentdate}[1]{{\flushright #1\par\vspace{16pt}}}
+\newcommand{\lettercontent}[1]{{#1\par\vspace{12pt}}}
+\newcommand{\closing}[1]{{#1\par\vspace{24pt}}}
+\newcommand{\signature}[1]{{\flushright #1\par}}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     标题
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\namesection{[你的姓名]}
+
+\currentdate{\today}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     求职信正文
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\lettercontent{尊敬的 [招聘负责人 / HR / 具体姓名]：}
+
+\lettercontent{您好！我通过 [招聘网站/内推/公司官网] 了解到贵司正在招聘 [岗位名称]。结合我在 [核心领域] 的 [X 年] 经验，以及在 [关键技术/业务方向] 上的实践，我非常希望能加入贵团队。}
+
+\lettercontent{在 [前公司/项目] 期间，我主要负责 [核心职责]，并取得了以下成果：}
+
+\begin{itemize}
+    \item [具体成果 1 - 尽量量化]
+    \item [具体成果 2]
+    \item [具体成果 3]
+\end{itemize}
+
+\lettercontent{贵司在 [业务方向/技术方向] 上的布局与我的职业兴趣高度契合，尤其是 [具体项目/产品/技术栈] 让我印象深刻。我相信自己的 [核心技能 1] 与 [核心技能 2] 能够为贵团队带来直接价值。}
+
+\lettercontent{附件是我的中文简历，详细介绍了我的教育背景与工作经历。期待能有机会参加面试，进一步交流我如何为贵司贡献力量。}
+
+\closing{此致\\敬礼}
+
+\signature{[你的姓名]}
+
+\end{document}

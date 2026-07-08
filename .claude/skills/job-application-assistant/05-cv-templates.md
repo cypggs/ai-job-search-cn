@@ -256,3 +256,58 @@ The section order varies by role type:
 4. Professional Experience (reverse chronological)
 5. Publications & Awards
 6. References
+
+---
+
+## Chinese CV Template (for 中国求职市场)
+
+Use the Chinese moderncv template when targeting roles in mainland China.
+
+**Template file:** `cv/chinese/main.tex`
+**Compile with:** `lualatex` or `xelatex` (XeLaTeX/LuaLaTeX handle `ctex` Chinese fonts reliably; pdflatex will fail).
+**Recommended compile command:**
+```bash
+cd cv/chinese && lualatex -interaction=nonstopmode main.tex
+```
+
+### Chinese-specific structure
+
+Typical section order for Chinese tech/internet roles:
+1. 求职意向 / 个人简介 (target role + elevator pitch)
+2. 核心优势 (core competencies)
+3. 工作经历 (reverse chronological)
+4. 项目经历 (optional but common)
+5. 教育背景
+6. 技能清单 (technical skills + languages)
+7. 证书与荣誉 (optional)
+8. 自我评价 (optional, 1-2 lines)
+
+### Personal data for Chinese CVs
+
+In `cv/chinese/main.tex`, replace:
+- `\name{[姓名]}{}` with the candidate's full Chinese name.
+- `\phone[mobile]{[手机号码]}` with the mobile number.
+- `\email{[邮箱地址]}` with email.
+- `\extrainfo{\href{...}{LinkedIn / GitHub} | 微信：[微信号]}` with relevant links and WeChat (optional).
+
+### Optional state-owned enterprise (SOE) fields
+
+For 国企/事业单位 applications, additional fields may be required. Add them as a separate "基本信息" section near the top if needed:
+- 政治面貌 (Party/membership status)
+- 籍贯 (Hometown)
+- 民族 (Ethnicity)
+- 出生年月 (Date of birth)
+- 现居城市 (Current city)
+
+These are **not included by default** for private-sector tech roles; only add when the target employer explicitly requires them.
+
+### Font troubleshooting
+
+If compilation fails with a CJK font error, the system does not have a default Chinese font. Common fixes:
+- **macOS:** Use `\setCJKmainfont{PingFang SC}` after `\usepackage{ctex}`.
+- **Windows:** Use `\setCJKmainfont{SimHei}`.
+- **Linux:** Install `fonts-noto-cjk` and use `\setCJKmainfont{Noto Sans CJK SC}`.
+
+### Page budget for Chinese CVs
+
+Same hard 2-page A4 limit. Chinese characters are denser, so the same page can hold more content, but keep bullets concise and scannable. ATS parsers for Chinese job sites (BOSS 直聘, 拉勾, 猎聘) read the PDF text layer; avoid image-only text and verify with `pdftotext`.

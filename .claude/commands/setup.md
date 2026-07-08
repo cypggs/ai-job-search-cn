@@ -245,11 +245,14 @@ Walk through each section conversationally. Ask questions naturally, not as a fo
 ### Section 1: Identity & Contact
 Ask about:
 - Full name
+- Chinese name (中文姓名) — for 国企/事业单位 or Chinese-only applications
 - Location (city, country)
 - Phone, email, LinkedIn, GitHub
+- WeChat (微信号) — common in China, optional
 - Languages spoken (with proficiency levels)
 - Current employment status
 - Family/commute constraints (if any)
+- Optional SOE fields if targeting state-owned enterprises: 政治面貌，籍贯，民族
 
 ### Section 2: Education
 For each degree:
@@ -297,6 +300,9 @@ If not, ask behavioral questions:
 - What excites you in work
 - Deal-breakers and must-haves
 - Salary expectations/baseline (optional)
+  - For China-market roles, ask for expected monthly/annual compensation and months of salary (e.g. 13薪/14薪)
+- Work mode preference: 现场办公 / 远程 / 混合
+- Willingness to accept 996, 大小周, or heavy overtime
 - What environments to avoid
 - Commute/location constraints
 
@@ -309,16 +315,16 @@ For each reference:
 This section generates the search queries that power `/scrape`. Use the information from Sections 1, 4, and 7 to build targeted queries.
 
 Ask about:
-- **Role titles to search for:** "What job titles should I search for? For example: Data Scientist, ML Engineer, Geophysicist." Collect 3-8 specific titles.
+- **Role titles to search for:** "What job titles should I search for? For example: 后端开发, 算法工程师, 产品经理, 数据科学家." Collect 3-8 specific titles.
 - **Key skills as search terms:** "Which of your skills are most likely to appear in job postings?" Pick 3-5 that are distinctive and searchable.
 - **Target companies (optional):** "Are there specific companies you'd like to monitor for openings?"
 - **Geographic scope:** "Which cities or regions should I search in? How far are you willing to commute?" Use this to define the location filter tiers (ideal, acceptable, borderline, too far).
-- **Job portals:** "The framework includes tools for Danish job portals (Jobindex, Jobbank, Jobdanmark, Jobnet). Are these the right ones for you, or do you use other sites?" Note: if the user is outside Denmark, acknowledge that the built-in CLI tools are Denmark-specific and suggest they can add their own portal integrations or rely on LinkedIn/Google site-searches.
+- **Job portals:** "Which job portals do you use? The framework can be extended for Chinese portals such as BOSS直聘, 拉勾, 猎聘, 智联招聘, 前程无忧. By default, `/scrape` uses WebSearch and manual URL/description input for Chinese sites because many of them restrict automated access."
 
 **Important:** Also suggest role types the user may not have considered, based on their skill profile. For example:
-- If they have strong Python + domain expertise: "Have you considered roles like 'Technical Consultant' or 'Solutions Engineer' in your domain?"
+- If they have strong Python + domain expertise: "Have you considered roles like '技术顾问' or '解决方案架构师' in your domain?"
 - If they have ML + a specific industry: "Companies in adjacent industries also hire for these skills. Should I include searches for [adjacent sector]?"
-- If they have project management experience alongside technical skills: "Would you also want to search for 'Technical Project Manager' or 'Team Lead' roles?"
+- If they have project management experience alongside technical skills: "Would you also want to search for '技术项目经理' or '研发组长' roles?"
 
 This proactive suggestion step helps users discover career paths they might not have considered.
 

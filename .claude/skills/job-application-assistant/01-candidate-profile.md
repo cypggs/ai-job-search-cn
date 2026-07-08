@@ -5,13 +5,28 @@
 
 ## Identity
 - **Name:** [YOUR_NAME]
+- **Chinese Name:** [中文姓名] (for 国企/事业单位 or Chinese-only applications)
 - **Location:** [YOUR_ADDRESS]
 - **Phone:** [YOUR_PHONE]
 - **Email:** [YOUR_EMAIL]
+- **WeChat:** [微信号] (optional, common in China)
 - **LinkedIn:** [YOUR_LINKEDIN_URL]
 - **GitHub:** [YOUR_GITHUB_URL]
 - **Languages:** [YOUR_LANGUAGES with proficiency levels]
 - **Status:** [YOUR_EMPLOYMENT_STATUS]
+- **Current City:** [现居城市]
+- **Hometown / 籍贯:** [籍贯] (optional, sometimes required for 国企/事业单位)
+- **Political Status / 政治面貌:** [政治面貌] (optional, e.g. 中共党员/群众/共青团员)
+- **Ethnicity / 民族:** [民族] (optional)
+
+## Job Search Preferences
+- **Target Role / 求职意向:** [目标岗位]
+- **Years of Experience / 工作年限:** [X 年]
+- **Expected Salary / 期望薪资:** [期望月薪/年薪范围，如 30k-40k·14薪]
+- **Current Salary / 当前薪资:** [当前月薪/年薪，可选]
+- **Availability / 到岗时间:** [到岗时间，如 一周内/一个月内/协商]
+- **Work Mode / 工作方式:** [现场办公/远程/混合]
+- **Target Cities / 期望城市:** [城市1, 城市2]
 - **Constraints:** [YOUR_COMMUTE_OR_LOCATION_CONSTRAINTS]
 
 ## Education

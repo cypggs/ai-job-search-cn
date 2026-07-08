@@ -2,9 +2,11 @@
   <img src="claude_animation.gif" alt="AI Job Search Assistant" width="200">
 </p>
 
-# AI Job Search
+# AI Job Search — 中国求职版
 
 An AI-powered job application framework built on [Claude Code](https://claude.com/claude-code). Fork it, fill in your profile, and let Claude evaluate job postings, tailor your CV, write cover letters, and prepare you for interviews.
+
+This fork is adapted for the **Chinese job market** (中国求职市场). It adds Chinese CV/cover-letter LaTeX templates, Chinese-market profile fields (求职意向、期望薪资、到岗时间、工作年限、政治面貌等), and WebSearch-based scraping for Chinese portals (BOSS 直聘、拉勾、猎聘、智联招聘、前程无忧).
 
 > Note: This is an independent open-source project and is not affiliated with, endorsed by, sponsored by, or maintained by Anthropic. Anthropic and Claude Code are referenced only to describe the toolchain this workflow uses.
 
@@ -16,7 +18,11 @@ An AI-powered job application framework built on [Claude Code](https://claude.co
 
 ## What this is
 
-A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search skills are built for the Danish market (Jobindex, Jobnet, Akademikernes Jobbank, etc.), but the pattern is designed to be swapped for your local job boards.
+A structured workflow that turns Claude Code into a full-stack job application assistant. This fork targets the **Chinese job market** while keeping the drafter-reviewer application pipeline intact.
+
+For China-market roles, the framework generates **Chinese CVs and cover letters** (`cv/chinese/main.tex`, `cover_letters/chinese/cover.tex`) using `ctex` and moderncv. For international or English-speaking roles, the original English templates remain available.
+
+The default job search relies on **WebSearch** for Chinese portals because BOSS 直聘、拉勾、猎聘 etc. aggressively block automated access. You can paste a job URL or description directly into `/apply` to bypass scraping limitations.
 
 ```
 /setup          /scrape              /apply <url>
@@ -42,6 +48,10 @@ The framework encodes career guidance best practices, including structured evalu
 - Python 3.10+
 - [Bun](https://bun.sh) (for Danish job search CLI tools)
 - LaTeX distribution with `lualatex` and `xelatex`: [TeX Live](https://tug.org/texlive/) or [MiKTeX](https://miktex.org/). The CV compiles with `lualatex` (pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors); the cover letter compiles with `xelatex` because `cover.cls` requires `fontspec`.
+- **Chinese fonts** for the Chinese CV/cover letter templates. The templates use the `ctex` package, which auto-detects system fonts. If compilation fails:
+  - **macOS:** MacTeX includes 苹方/华文 fonts by default.
+  - **Windows:** MiKTeX/TeX Live will use SimHei/SimSun.
+  - **Linux:** install `fonts-noto-cjk` (Noto Sans CJK SC) or specify another available CJK font in the template.
 - Optional: `pdftotext` from [poppler](https://poppler.freedesktop.org/) (macOS: `brew install poppler`, Debian/Ubuntu: `apt install poppler-utils`, Windows: `choco install poppler`) — used by `/apply`'s ATS parseability check on the compiled CV. If missing, the check degrades gracefully to a visual keyword review.
 
 ## Quick start
@@ -49,17 +59,18 @@ The framework encodes career guidance best practices, including structured evalu
 ### 1. Fork and clone
 
 ```bash
-gh repo fork MadsLorentzen/ai-job-search --clone
+gh repo fork cypggs/ai-job-search --clone
+# or fork from the upstream MadsLorentzen/ai-job-search and merge Chinese changes manually
 cd ai-job-search
 ```
 
-### 2. Install job search tools
+### 2. Install job search tools (optional)
+
+For Chinese portals, `/scrape` uses WebSearch by default because most Chinese boards block automated scraping. If you want to experiment with portal-specific CLI tools, you can scaffold them with `/add-portal`.
+
+The original Danish portal CLIs and `linkedin-search` are still in `.agents/skills/` if you want to install them:
 
 ```bash
-cd .agents/skills/jobbank-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobdanmark-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobindex-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobnet-search/cli && bun install && cd ../../../..
 cd .agents/skills/linkedin-search/cli && bun install && cd ../../../..
 ```
 
@@ -81,19 +92,27 @@ claude
 /scrape
 ```
 
-This searches multiple job portals for positions matching your profile, deduplicates results, and presents them sorted by fit. Pick a match to run `/apply` on it directly — or, when a scrape returns more jobs than you want to eyeball, run `/rank` to batch-score them all against the fit framework and get a ranked shortlist first.
+This runs WebSearch queries for Chinese job portals and presents matches sorted by fit. Because BOSS 直聘、拉勾 etc. block scrapers, results may be limited to titles/snippet. Pick a match to run `/apply` directly — or, when a scrape returns more jobs than you want to eyeball, run `/rank` to batch-score them first.
+
+You can also paste a job description directly:
+
+```bash
+/apply [paste the full job description here]
+```
 
 ### 5. Apply to a job
 
 ```bash
-/apply https://jobindex.dk/job/1234567
+/apply https://www.zhipin.com/job/xxxxxxxx.html
 ```
 
-If the URL can't be fetched (some job portals block automated access), you can paste the job description directly instead:
+If the URL can't be fetched (common with Chinese portals), paste the job description directly:
 
 ```bash
-/apply <paste the full job description here>
+/apply [paste the full job description here]
 ```
+
+For China-market postings, `/apply` automatically generates Chinese CV and cover letter PDFs. For international postings, it uses the original English templates.
 
 This runs the full workflow: evaluate fit, draft CV + cover letter, review with a second agent, revise, and present the final output.
 
@@ -145,10 +164,14 @@ ai-job-search/
 │   ├── jobnet-search/                 # Jobnet.dk (Denmark, government portal)
 │   └── linkedin-search/               # LinkedIn public job listings (country-agnostic)
 ├── cv/
-│   └── main_example.tex               # moderncv LaTeX template
+│   ├── main_example.tex               # moderncv LaTeX template (English/international)
+│   └── chinese/
+│       └── main.tex                   # 中文简历模板 (ctex + moderncv)
 ├── cover_letters/
-│   ├── cover.cls                      # Custom cover letter LaTeX class
-│   └── OpenFonts/                     # Lato + Raleway fonts
+│   ├── cover.cls                      # Custom cover letter LaTeX class (English)
+│   ├── OpenFonts/                     # Lato + Raleway fonts
+│   └── chinese/
+│       └── cover.tex                  # 中文求职信模板 (ctexart)
 ├── templates/                         # Custom templates registered via /add-template
 │   └── README.md                      # Folder layout instructions
 ├── documents/                         # Career source materials for /setup Path A and /expand
@@ -219,7 +242,16 @@ This re-runs the search configuration interview: which roles to target, which sk
 
 ### LaTeX templates
 
-The CV uses [moderncv](https://ctan.org/pkg/moderncv) (banking style). The cover letter uses a custom `cover.cls` with Lato/Raleway fonts.
+The default CV uses [moderncv](https://ctan.org/pkg/moderncv) (banking style). The default cover letter uses a custom `cover.cls` with Lato/Raleway fonts.
+
+For **Chinese applications**, use the templates in `cv/chinese/main.tex` and `cover_letters/chinese/cover.tex`. They rely on the `ctex` package and compile with `lualatex` or `xelatex`:
+
+```bash
+cd cv/chinese && lualatex -interaction=nonstopmode main.tex
+cd ../../cover_letters/chinese && xelatex -interaction=nonstopmode cover.tex
+```
+
+If `ctex` cannot find a Chinese font on your system, specify a fontset in the document class or set `\setCJKmainfont` to an installed CJK font (see comments in the templates).
 
 To use your own template instead, run:
 
@@ -237,7 +269,9 @@ If you prefer doing it by hand, the manual route still works: update the guidanc
 
 ### Job search tools
 
-The four Danish CLI tools in `.agents/skills/` (Jobbank, Jobdanmark, Jobindex, Jobnet) demonstrate the pattern for building a job-portal integration for a specific market. If you're in a different country, run:
+For the Chinese market, `/scrape` primarily uses **WebSearch** against BOSS 直聘、拉勾、猎聘、智联招聘、前程无忧 because these portals restrict automated access. You can paste a job URL or full description directly into `/apply` to bypass scraping limits.
+
+If you want to build a portal-specific CLI for a site that allows it, run:
 
 ```
 /add-portal

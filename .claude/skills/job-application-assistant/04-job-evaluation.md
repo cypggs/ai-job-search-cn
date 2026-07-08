@@ -47,10 +47,17 @@ Does the role and company culture match the behavioral profile?
 **Red flags to research:** Department disorganization, work dominated by maintenance over development, poor chemistry with leadership, culture mismatches. Check reviews, media coverage, LinkedIn connections, and network contacts for insider perspective.
 
 ### 4. Location & Logistics (Pass/Fail + Notes)
-- Within commute range: PASS
-- Remote with occasional office: PASS
-- Requires relocation: FAIL (deal-breaker)
-- Frequent international travel: FLAG (discuss with user)
+- Within commute range or fully remote: PASS
+- Hybrid with reasonable office days: PASS
+- Requires relocation to an unacceptable city: FAIL
+- Frequent business travel: FLAG (discuss with user)
+
+**China-specific work-culture checks:**
+- Work schedule: standard 5-day / 996 /大小周. 996 or大小周 should be flagged unless the user has explicitly accepted it.
+- Overtime compensation: paid,调休, or none.
+- Social insurance / 五险一金: check whether the employer offers full contributions.
+- Probation terms / 试用期: typical is 3-6 months; overly long or unpaid probation is a red flag.
+- Contract type: direct hire, outsourcing, or labor dispatch / 劳务派遣.
 
 ### 5. Career Alignment & Motivation (0-100)
 Does this role advance career goals and contain tasks that energize?
@@ -86,6 +93,11 @@ python salary_lookup.py "<Company Name>" --json
 
 If a city is known from the posting, add `--city "<City>"` to narrow results.
 
+**China-specific context:** Chinese postings usually quote monthly salary (e.g. `20k-30k·14薪`) or total annual package. When benchmarking:
+- Normalize to annual total compensation: monthly × months + bonus/股票 (if disclosed).
+- Note whether the range is pre-tax / 税前.
+- If no local data is available, note the user's expected-salary range from `01-candidate-profile.md` and compare qualitatively.
+
 Present findings as:
 ```
 ### Salary Benchmark
@@ -97,7 +109,7 @@ Present findings as:
 
 Interpret results relative to the baseline defined in the data file's metadata. For index-based data, higher typically means above-market compensation.
 
-If the salary tool is not configured, skip this section.
+If the salary tool is not configured, skip this section and compare the posted range against the candidate's `Expected Salary / 期望薪资`.
 
 ## Output Format
 
@@ -129,10 +141,11 @@ Present the evaluation as:
 
 ### Company Research Checklist
 - [ ] Checked company website (mission, values, recent news)
-- [ ] Checked review sites (Glassdoor, Jobindex, etc.)
-- [ ] Checked LinkedIn for team size, recent hires, connections
-- [ ] Checked media for restructuring, growth, or workplace issues
+- [ ] Checked Chinese review sites (脉脉, 看准网, Boss 直聘公司主页, 拉勾公司页)
+- [ ] Checked LinkedIn / 领英 for team size, recent hires, connections
+- [ ] Checked media for restructuring, funding rounds, layoffs, or workplace issues
 - [ ] Identified network contacts who may know the team/manager
+- [ ] Checked 企查查 / 天眼查 for company registration, size, and legal disputes (optional)
 ```
 
 ## Weighting
