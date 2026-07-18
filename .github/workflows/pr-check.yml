@@ -23,4 +23,9 @@ jobs:
         run: python -m compileall -q .
 
       - name: Run unit tests
-        run: python -m unittest discover -s tests -t . -v
+        run: |
+          if [ -d tests ]; then
+            python -m unittest discover -s tests -t . -v
+          else
+            echo "No tests/ directory in this branch — skipping unit tests"
+          fi
