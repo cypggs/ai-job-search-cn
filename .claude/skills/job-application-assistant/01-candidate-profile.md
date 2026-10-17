@@ -1,3 +1,7 @@
+---
+framework_version: 1.1.1
+---
+
 # Candidate Profile
 
 <!-- SETUP: This file is populated by running /setup -->
@@ -12,7 +16,6 @@
 - **WeChat:** [微信号] (optional, common in China)
 - **LinkedIn:** [YOUR_LINKEDIN_URL]
 - **GitHub:** [YOUR_GITHUB_URL]
-- **Languages:** [YOUR_LANGUAGES with proficiency levels]
 - **Status:** [YOUR_EMPLOYMENT_STATUS]
 - **Current City:** [现居城市]
 - **Hometown / 籍贯:** [籍贯] (optional, sometimes required for 国企/事业单位)
@@ -28,6 +31,16 @@
 - **Work Mode / 工作方式:** [现场办公/远程/混合]
 - **Target Cities / 期望城市:** [城市1, 城市2]
 - **Constraints:** [YOUR_COMMUTE_OR_LOCATION_CONSTRAINTS]
+
+### Languages
+<!-- Every language you can work in professionally, with your honest level. Used by the
+Language Gate in 04-job-evaluation.md and by job-scraper/search-queries.md's query-language
+generation. Omit any language you don't actually work in - an undeclared language is treated as
+a hard no, not a gap to smooth over. -->
+
+| Language | Level | Notes |
+|----------|-------|-------|
+| [LANGUAGE] | [LEVEL, e.g. "Native" / "C2" / "B1/B2 (conversational)"] | [optional] |
 
 ## Education
 

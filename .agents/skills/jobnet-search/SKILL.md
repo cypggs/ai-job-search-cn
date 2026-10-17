@@ -18,7 +18,8 @@ description: >
   social worker job denmark, occupation search denmark, esco occupation, job deadline,
   ansøgningsfrist, søg efter job, full time job denmark, part time job denmark.
 context: fork
-allowed-tools: Bash(bun run skills/jobnet-search/cli/src/cli.ts *)
+enabled: false  # Danish demo portal - ships opt-in; /setup enables it when your market is Denmark, or set true here yourself
+allowed-tools: Bash(bun run .agents/skills/jobnet-search/cli/src/cli.ts *)
 ---
 
 # Jobnet-Search Skill
@@ -45,7 +46,7 @@ Invoke this skill when the user wants to:
 ### Search for job ads
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts search [flags]
+bun run .agents/skills/jobnet-search/cli/src/cli.ts search [flags]
 ```
 
 Key flags:
@@ -65,16 +66,16 @@ Key flags:
 ### Full job ad detail
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts detail <jobAdId> [--format json|plain]
+bun run .agents/skills/jobnet-search/cli/src/cli.ts detail <jobAdId> [--format json|plain]
 ```
 
-`jobAdId` is the UUID from `search` results (the `jobAdId` field). Returns the complete job
+`jobAdId` is the UUID from `search` results (the `jobAdId` field, also emitted as `id`, the portal-contract name every search CLI shares). Returns the complete job
 description, contact persons, application deadline, employer details, and direct application URL.
 
 ### Search occupation types
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts occupations --search-string <text> [--per-page <n>]
+bun run .agents/skills/jobnet-search/cli/src/cli.ts occupations --search-string <text> [--per-page <n>]
 ```
 
 Use this to discover ESCO occupation identifiers before passing them to `search` with
@@ -83,7 +84,7 @@ Use this to discover ESCO occupation identifiers before passing them to `search`
 ### Typeahead suggestions
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts suggestions --query <text> [--limit <n>]
+bun run .agents/skills/jobnet-search/cli/src/cli.ts suggestions --query <text> [--limit <n>]
 ```
 
 Returns Danish job title autocomplete strings. Useful for exploring valid Danish
@@ -97,8 +98,8 @@ job titles before constructing a `search` query.
 term or ESCO identifier before running a `search`:
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts suggestions --query "syge"
-bun run skills/jobnet-search/cli/src/cli.ts occupations --search-string "sygeplejerske"
+bun run .agents/skills/jobnet-search/cli/src/cli.ts suggestions --query "syge"
+bun run .agents/skills/jobnet-search/cli/src/cli.ts occupations --search-string "sygeplejerske"
 ```
 
 **Natural workflow: `search` → `detail`.**
@@ -128,7 +129,7 @@ CLI outputs. Use `--page` + `--per-page` to iterate through large result sets.
 ### Jobs in Copenhagen area
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts search \
+bun run .agents/skills/jobnet-search/cli/src/cli.ts search \
   --region HovedstadenOgBornholm \
   --per-page 10 \
   --format table
@@ -137,7 +138,7 @@ bun run skills/jobnet-search/cli/src/cli.ts search \
 ### Nurse jobs nationwide
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts search \
+bun run .agents/skills/jobnet-search/cli/src/cli.ts search \
   --search-string "sygeplejerske" \
   --work-hours FullTime \
   --duration Permanent \
@@ -149,7 +150,7 @@ bun run skills/jobnet-search/cli/src/cli.ts search \
 ### IT jobs near Aarhus within 30km
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts search \
+bun run .agents/skills/jobnet-search/cli/src/cli.ts search \
   --search-string "udvikler" \
   --postal-code 8000 \
   --radius 30 \
@@ -160,13 +161,13 @@ bun run skills/jobnet-search/cli/src/cli.ts search \
 ### Full details of a job ad
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts detail 9ef43bce-d82b-4ea1-a098-7ff6520f99be --format plain
+bun run .agents/skills/jobnet-search/cli/src/cli.ts detail 9ef43bce-d82b-4ea1-a098-7ff6520f99be --format plain
 ```
 
 ### Jobs sorted by application deadline (urgent first)
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts search \
+bun run .agents/skills/jobnet-search/cli/src/cli.ts search \
   --search-string "pædagog" \
   --region OevrigeSjaelland \
   --order ApplicationDate \
@@ -176,8 +177,8 @@ bun run skills/jobnet-search/cli/src/cli.ts search \
 ### Discover occupation terms
 
 ```bash
-bun run skills/jobnet-search/cli/src/cli.ts suggestions --query "ingeniør" --limit 5
-bun run skills/jobnet-search/cli/src/cli.ts occupations --search-string "lærer" --per-page 5
+bun run .agents/skills/jobnet-search/cli/src/cli.ts suggestions --query "ingeniør" --limit 5
+bun run .agents/skills/jobnet-search/cli/src/cli.ts occupations --search-string "lærer" --per-page 5
 ```
 
 ---
@@ -201,5 +202,5 @@ All errors are written to **stderr** as `{ "error": "...", "code": "..." }` and 
 - Pagination is 1-indexed (`--page 1` is the first page).
 - `search` results omit the HTML job description — use `detail` to get it.
 - `detail --format plain` strips HTML tags for readable text output.
-- Job ad detail pages on jobnet.dk: `https://jobnet.dk/job/{jobAdId}`
+- Job ad detail pages on jobnet.dk: `https://jobnet.dk/find-job/{jobAdId}` (non-external ads; external ads use employer `jobAdUrl`).
 - `suggestions` is tuned for Danish job titles — English terms may return empty results.

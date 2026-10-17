@@ -14,7 +14,7 @@ export async function apiFetch<T>(path: string, params?: Record<string, string>)
   const maxRetries = 6
   let delay = 500
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const response = await fetch(url)
+    const response = await fetch(url, { signal: AbortSignal.timeout(15000) })
     if (response.status === 429 || response.status >= 500) {
       if (attempt === maxRetries) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`)
@@ -43,6 +43,7 @@ export async function htmlFetch(url: string): Promise<string> {
         "Accept-Language": "da,en;q=0.9",
       },
       redirect: "follow",
+      signal: AbortSignal.timeout(15000),
     })
     if (response.status === 429 || response.status >= 500) {
       if (attempt === maxRetries) {
@@ -159,7 +160,11 @@ export function parseSearchPage(html: string): SearchPageResult {
       }
     }
     let deadline: string | null = null
-    if (r.apply_deadline_asap) deadline = "ASAP"
+    // apply_deadline_asap means the posting states no fixed deadline ("apply
+    // now"). The /scrape contract represents that as null, and consumers do
+    // date arithmetic on this field - so the flag maps to null, and wins over
+    // any date field that happens to be present.
+    if (r.apply_deadline_asap) deadline = null
     else if (typeof r.apply_deadline === "string") deadline = r.apply_deadline.slice(0, 10)
     else if (typeof r.lastdate === "string") deadline = r.lastdate
 
@@ -304,6 +309,33 @@ export function parseJobCards(html: string): JobCard[] {
   }
 
   return results
+}
+
+export function extractDivContent(html: string, className: string): string | null {
+  const escaped = className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const openRe = new RegExp(`<div[^>]*class="[^"]*${escaped}[^"]*"[^>]*>`, 'i')
+  const open = openRe.exec(html)
+  if (!open) return null
+
+  let i = open.index + open[0].length
+  let depth = 1
+
+  while (depth > 0 && i < html.length) {
+    const nextOpen = html.indexOf('<div', i)
+    const nextClose = html.indexOf('</div>', i)
+
+    if (nextClose === -1) return null
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      depth++
+      i = nextOpen + 4
+    } else {
+      depth--
+      i = nextClose + 6
+    }
+  }
+
+  return html.slice(open.index + open[0].length, i - 6)
 }
 
 export function parseHitCount(html: string): number {

@@ -17,16 +17,24 @@ Create `reports/` if it does not exist.
 Read in parallel:
 
 1. **`job_search_tracker.csv`** — the primary source. Parse every row into a record with fields:
-   `date`, `company`, `sector`, `role`, `role_type`, `channel`, `status`, `contact_person`, `fit_rating`, `notes`, `cv_file`, `cover_letter_file`, `source`
+   `date`, `company`, `sector`, `role`, `role_type`, `channel`, `status`, `contact_person`, `fit_rating`, `notes`, `cv_file`, `cover_letter_file`, `source`, `deadline`
+
+   Rows written before `deadline` existed have thirteen fields and no fourteenth value. Treat the missing field as empty - never drop the row, and never infer a deadline from its `date`.
 
 2. **`documents/applications/*/outcome.md`** — for each resolved application, read the outcome file to get the exact interview stages reached (the checkboxes) and any notes. Merge this into the matching tracker row by company+role fuzzy match (lowercase, ignore punctuation). If an archive exists for a row but there is no match, attach it as extra context anyway.
 
-Status normalisation — map tracker values to five canonical buckets before computing stats:
+Status normalisation — map tracker values to six canonical buckets before computing stats:
+- `drafted` → **Drafted** (documents written by `/apply`, not yet submitted)
 - `applied` → **Active** (resume submitted, no further signal)
 - `interview` → **Interview**
 - `offer` → **Offer**
 - `hired` → **Hired**
-- `rejected` / `no_response` / `no response` / `offer_declined` / `interview_only` / `withdrawn` → **Rejected/Closed**
+- `rejected` / `no_response` / `no response` / `offer_declined` / `offer declined` / `withdrawn` → **Rejected/Closed**
+- anything else → **Rejected/Closed**, and name the unrecognised value once in the status breakdown — matching is case-insensitive
+
+   The bucket map tolerates the legacy space spellings on read so nothing written before
+   the canonical forms were locked drops out of the stats; the **Tracker status vocabulary**
+   in `/outcome` is the authoritative set.
 
 ---
 
@@ -34,29 +42,33 @@ Status normalisation — map tracker values to five canonical buckets before com
 
 From the normalised data compute:
 
+**Drafted rows are excluded from every statistic below** — they were never submitted. Report the Drafted count on its own, and include it only in the status breakdown.
+
 - **Total applications**
 - **By status bucket:** count per bucket
 - **By sector:** count per unique sector value
-- **By channel:** online vs referral vs other
+- **By channel:** portal vs online vs referral vs other
 - **By year/season:** group by the `date` field (which may be a year like `2025` or a full date)
-- **Funnel rates:** what % progressed past resume screen (reached Interview or beyond)
-- **Rejection rate:** Rejected/Closed ÷ Total with a resolved status (exclude Active)
+- **Funnel rates:** what % progressed past resume screen (reached Interview or beyond). Compute stage-reached from history, not current status: an application counts as having reached a stage when its current status implies it **or** its merged `outcome.md` stage checkboxes (Step 1.2) show the stage was reached - a `rejected` row whose outcome file ticks an interview stage reached Interview, and a `hired` row reached every stage before Hired. Current status alone structurally undercounts every earlier stage: a finished search would read as though nobody ever interviewed.
+- **Rejection rate:** true rejections (`rejected`, `no_response`) ÷ applications with a final outcome. `offer_declined` (the candidate turned the offer down - a success) and `withdrawn` (candidate-initiated) are not rejections and stay out of the numerator; Interview and Offer rows are still unresolved, so they stay out of the denominator along with Active. The Rejected/Closed status *bucket* still groups all closed rows for the doughnut - the rate just must not reuse the bucket blindly.
 
 ---
 
 ## Step 3: Generate the HTML
 
-Write a single self-contained HTML file. All CSS is inline in a `<style>` block. All JS is inline in a `<script>` block. Use Chart.js loaded from `https://cdn.jsdelivr.net/npm/chart.js` for the doughnut and bar charts (requires network on first open; charts degrade gracefully to the stats cards if offline). No other external dependencies.
+Write a single self-contained HTML file. All CSS is inline in a `<style>` block. All JS is inline in a `<script>` block. Draw the doughnut and bar charts as hand-generated inline SVG — no Chart.js, no CDN, no external dependencies of any kind. The report must render fully offline on every open.
+
+**Escaping (required):** HTML-escape every CSV/outcome-file value (`&` `<` `>` `"` `'`) before interpolating it into the page — this includes table cells, `title` attributes on truncated notes, and any text placed inside SVG (`<text>` labels, chart tooltips). Notes and company names copied from job postings routinely contain these characters; unescaped, they break the layout or inject markup into a page the user opens routinely.
 
 ### Layout
 
 ```
 ┌─────────────────────────────────────────────┐
 │  🔍 Job Search Dashboard    Generated: DATE  │
-├──────┬──────┬──────┬──────┬──────────────────┤
-│Total │Active│Inter-│Offer │Rejected/Closed   │  ← stat cards
-│  N   │  N   │view N│  N   │       N          │
-├──────┴──────┴──────┴──────┴──────────────────┤
+├──────┬──────┬──────┬──────┬──────┬───────────┤
+│Sent  │Draft │Active│Inter-│Offer │Rejected/  │  ← stat cards
+│  N   │  N   │  N   │view N│  N   │Closed   N │
+├──────┴──────┴──────┴──────┴──────┴───────────┤
 │  Status breakdown (doughnut) │ By sector (bar)│  ← charts row
 ├─────────────────────────────────────────────  ┤
 │  By channel (bar)  │  Funnel (horizontal bar) │  ← charts row
@@ -70,6 +82,7 @@ Write a single self-contained HTML file. All CSS is inline in a `<style>` block.
 ### Design spec
 
 - **Colour palette:** CSS custom properties. Status colours:
+  - Drafted: `#64748b` (slate)
   - Active: `#3b82f6` (blue)
   - Interview: `#f59e0b` (amber)
   - Offer: `#8b5cf6` (purple)
@@ -88,18 +101,18 @@ Write a single self-contained HTML file. All CSS is inline in a `<style>` block.
 - **Responsive:** usable at 900px+, not broken below that
 - **Footer:** "Generated by Claude Code · ai-job-search · {ISO date}"
 
-### Chart.js charts
+### Charts (inline SVG)
 
 1. **Status doughnut** — slices for each status bucket, colours from the palette above
 2. **By sector bar** (horizontal) — company count per sector, sorted descending
 3. **By channel bar** — online / referral / other
-4. **Application funnel** (horizontal bar) — Applied → Interview → Offer → Hired, each bar = count reaching that stage
+4. **Application funnel** (horizontal bar) — Applied → Interview → Offer → Hired, each bar = count reaching that stage, derived per Step 2's funnel rule (current status **plus** the merged `outcome.md` stage checkboxes), so a candidate who interviewed and was later rejected still counts in the Interview bar
 
-All chart canvases have `aria-label` for accessibility. Wrap each in a `<div class="chart-card">` with a `<h3>` title above.
+Build each chart as a hand-written `<svg>` element: compute bar lengths/doughnut arc angles from the stats in Step 2 and emit the `<rect>`/`<path>`/`<circle>` and `<text>` elements directly — no charting library, no `<canvas>`. Each `<svg>` has `role="img"` and an `aria-label` summarizing the chart (e.g. "Status breakdown: 3 Active, 2 Interview, 1 Offer"). Wrap each in a `<div class="chart-card">` with an `<h3>` title above. Remember to escape any label/value text drawn into `<text>` nodes per the escaping rule above.
 
 ### Table: columns to include
 
-`Date` · `Company` · `Role` · `Sector` · `Channel` · `Status` · `Notes` (truncated to 80 chars with `title` tooltip for full text) · `Source` (link or `—`)
+`Date` · `Deadline` · `Company` · `Role` · `Sector` · `Channel` · `Status` · `Notes` (truncated to 80 chars with `title` tooltip for full text) · `Source` (link or `—`)
 
 Columns with only empty values across all rows may be omitted.
 
@@ -116,17 +129,17 @@ Then present:
 > Open it in any browser — no server needed.
 >
 > **Summary:**
-> - Total applications: N
+> - Applications sent: N · drafted, not yet sent: N
 > - Active: N · Interview: N · Hired: N · Rejected/Closed: N
 > - Funnel: N% progressed past resume screen
 >
-> Re-run `/html-report` any time after adding new entries via `/outcome` to refresh the dashboard.
+> Re-run `/html-report` any time after adding new entries via `/apply` or `/outcome` to refresh the dashboard.
 
 ---
 
 ## Design Principles
 
-- **Self-contained.** One file, opens offline (charts need a CDN fetch once; everything else is local).
+- **Self-contained.** One file, fully offline — charts are inline SVG, no CDN or external requests of any kind.
 - **Data-only.** This command reads and renders; it never writes to the tracker or archive.
 - **Idempotent.** Re-running overwrites the previous report at the same path — no accumulation.
 - **Graceful on sparse data.** With only a few rows (as now), charts render correctly for small N; the table is the primary value. Do not suppress charts just because N is small.

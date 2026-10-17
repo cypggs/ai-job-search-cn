@@ -22,7 +22,7 @@ export const locations = defineCommand({
     query: option(z.string().optional(), {
       description: "Location text to search (city, zip code, region) (required)",
     }),
-    limit: option(z.coerce.number().optional(), {
+    limit: option(z.coerce.number().int().min(1).optional(), {
       description: "Cap total suggestions returned",
     }),
     format: option(z.enum(["json", "table", "plain"]).default("json"), {

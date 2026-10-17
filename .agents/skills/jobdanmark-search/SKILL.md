@@ -17,7 +17,8 @@ description: >
   work in denmark, employment denmark, job denmark, jobs near me denmark,
   apprentice denmark, internship denmark, part-time denmark, full-time denmark.
 context: fork
-allowed-tools: Bash(bun run skills/jobdanmark-search/cli/src/cli.ts *)
+enabled: false  # Danish demo portal - ships opt-in; /setup enables it when your market is Denmark, or set true here yourself
+allowed-tools: Bash(bun run .agents/skills/jobdanmark-search/cli/src/cli.ts *)
 ---
 
 # Jobdanmark Search Skill
@@ -42,7 +43,7 @@ Invoke this skill when the user wants to:
 ### Search job listings
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts search [flags]
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts search [flags]
 ```
 
 Key flags:
@@ -62,16 +63,16 @@ Key flags:
 ### Full job detail
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts detail <slug> [--format json|plain]
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts detail <slug> [--format json|plain]
 ```
 
 `slug` is the URL path segment returned as `slug` in `search` results (e.g. `it-chef-soeges-til-rah`).
-Returns full structured job data from the job page's JSON-LD, including title, organization, location, employment type, deadline, and full HTML description.
+Returns full structured job data from the job page. The CLI prefers Schema.org JSON-LD when present and falls back to parsing the rendered HTML when Jobdanmark omits JSON-LD.
 
 ### List categories with live counts
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts categories [--format json|table|plain]
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts categories [--format json|table|plain]
 ```
 
 Returns all 10 job categories with current live job counts. Useful for giving the user an overview of the job market.
@@ -79,7 +80,7 @@ Returns all 10 job categories with current live job counts. Useful for giving th
 ### Autocomplete job titles and categories
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts autocomplete --query "<text>" [--limit <n>]
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts autocomplete --query "<text>" [--limit <n>]
 ```
 
 Use this to resolve search terms into precise job title IDs (`--jobtitle-id`) or category IDs (`--category`) for `search`. The `value` field in results is the ID to pass to `search`.
@@ -87,7 +88,7 @@ Use this to resolve search terms into precise job title IDs (`--jobtitle-id`) or
 ### Suggest locations
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts locations --query "<text>" [--limit <n>]
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts locations --query "<text>" [--limit <n>]
 ```
 
 Returns matching municipalities, zip codes, and regions. Use `value` from results as `--municipality` or `--zip` in `search`.
@@ -116,13 +117,13 @@ Returns matching municipalities, zip codes, and regions. Use `value` from result
 **Resolve locations first.** Use `locations` to find the correct municipality name or zip code before passing them to `search`:
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts locations --query "Aarhus" --format plain
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts locations --query "Aarhus" --format plain
 ```
 
 **Resolve job titles for precision.** Use `autocomplete` to get the exact job title ID when the user wants a specific role:
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts autocomplete --query "sygeplejerske" --format plain
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts autocomplete --query "sygeplejerske" --format plain
 ```
 
 **Natural workflow: `search` → `detail`.**
@@ -142,7 +143,7 @@ bun run skills/jobdanmark-search/cli/src/cli.ts autocomplete --query "sygeplejer
 ### IT jobs in Copenhagen
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts search \
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts search \
   --category 227978 \
   --municipality "København" \
   --job-type fuldtid \
@@ -152,7 +153,7 @@ bun run skills/jobdanmark-search/cli/src/cli.ts search \
 ### Nursing jobs anywhere in Denmark
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts search \
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts search \
   --text "sygeplejerske" \
   --category 227975 \
   --format table
@@ -161,7 +162,7 @@ bun run skills/jobdanmark-search/cli/src/cli.ts search \
 ### Student jobs in Aarhus
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts search \
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts search \
   --municipality "Aarhus" \
   --job-type studiejob \
   --format table
@@ -170,25 +171,25 @@ bun run skills/jobdanmark-search/cli/src/cli.ts search \
 ### What job categories are most active right now?
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts categories --format table
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts categories --format table
 ```
 
 ### Full details for a specific job posting
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts detail it-chef-soeges-til-rah --format plain
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts detail it-chef-soeges-til-rah --format plain
 ```
 
 ### Find jobs in zip code 8000
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts search --zip 8000 --format table
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts search --zip 8000 --format table
 ```
 
 ### What electrician jobs are available?
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts search \
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts search \
   --text "elektriker" \
   --category 227973 \
   --job-type "fuldtid,deltid" \
@@ -198,7 +199,7 @@ bun run skills/jobdanmark-search/cli/src/cli.ts search \
 ### Apprentice positions in all of Denmark
 
 ```bash
-bun run skills/jobdanmark-search/cli/src/cli.ts search \
+bun run .agents/skills/jobdanmark-search/cli/src/cli.ts search \
   --job-type elev \
   --page 1 \
   --format table
@@ -222,7 +223,7 @@ All errors are written to **stderr** as `{ "error": "...", "code": "..." }` and 
 
 - All data is from the public Jobdanmark.dk API — no credentials required.
 - Pagination is 1-indexed (`--page 1` is the first page). 30 items per page, server-enforced.
-- The `detail` command fetches the HTML job page and parses the embedded JSON-LD (schema.org/JobPosting). It does not use a separate JSON API.
-- `slug` in search results is extracted from the API's relative `url` field (the path after `/job/`).
+- The `detail` command fetches the HTML job page and parses embedded JSON-LD when available, with a rendered-HTML fallback for pages that omit structured data. It does not use a separate JSON API.
+- `slug` in search results is extracted from the API's relative `url` field (the path after `/job/`); it is also emitted as `id`, the portal-contract name every search CLI shares.
 - `applicationDeadline` in search results can be `null` (no deadline set).
 - Job type values for filters: `fuldtid`, `deltid`, `fleksjob`, `elev`, `studiejob`, `praktik`.

@@ -1,7 +1,6 @@
 import { defineCommand, option } from "@bunli/core"
 import { z } from "zod"
-import { fetchWithUA, writeError, BASE_URL } from "../helpers.js"
-import { parse as parseHtml } from "node-html-parser"
+import { fetchWithUA, normalizeJobId, parseJobPostingJsonLd, writeError, BASE_URL } from "../helpers.js"
 
 export const detail = defineCommand({
   name: "detail",
@@ -14,9 +13,15 @@ export const detail = defineCommand({
   handler: async ({ positional, flags, signal }) => {
     if (signal.aborted) return
 
-    const id = positional[0]
-    if (!id) {
+    const rawId = positional[0]
+    if (!rawId) {
       writeError("Job ID is required", "MISSING_REQUIRED")
+      process.exit(1)
+    }
+
+    const id = normalizeJobId(rawId)
+    if (!id) {
+      writeError(`Could not extract job ID from "${rawId}"`, "BAD_ID")
       process.exit(1)
     }
 
@@ -39,31 +44,7 @@ export const detail = defineCommand({
 
       if (signal.aborted) return
 
-      const root = parseHtml(html)
-
-      // Find all <script type="application/ld+json"> tags
-      const scripts = root.querySelectorAll('script[type="application/ld+json"]')
-      let jobPosting: Record<string, unknown> | null = null
-
-      for (const script of scripts) {
-        try {
-          const json = JSON.parse(script.text)
-          if (json["@type"] === "JobPosting") {
-            jobPosting = json
-            break
-          }
-          // Could be an array
-          if (Array.isArray(json)) {
-            const found = json.find((item) => item["@type"] === "JobPosting")
-            if (found) {
-              jobPosting = found
-              break
-            }
-          }
-        } catch {
-          // not valid JSON — skip
-        }
-      }
+      const jobPosting = parseJobPostingJsonLd(html)
 
       if (!jobPosting) {
         writeError("No JSON-LD found on job page", "PARSE_ERROR")

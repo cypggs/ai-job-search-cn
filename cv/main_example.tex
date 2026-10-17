@@ -10,28 +10,49 @@
 \moderncvstyle{banking}
 \moderncvcolor{blue}
 
-% Force both first and last name AND section headings to render in moderncv
-% blue (color1). Default banking on lualatex+MiKTeX leaves these black, which
-% looks inconsistent with the rest of the blue accent scheme.
-\renewcommand*{\firstnamestyle}[1]{{\fontsize{34}{36}\bfseries\upshape\color{color1}#1}}
-\renewcommand*{\lastnamestyle}[1]{{\fontsize{34}{36}\bfseries\upshape\color{color1}#1}}
+% Force the name and section headings to render in moderncv blue (color1).
+% Default banking leaves them black: moderncvstylebanking.sty's \colorlet
+% copies (not aliases) the pre-scheme accent colour, so the name colours are
+% frozen before \moderncvcolor runs. Re-let them after. \namefont is the hook
+% every name-style macro routes through, so this also works on moderncv 2.3.1
+% (Debian/Ubuntu apt), which has no \firstnamestyle/\lastnamestyle at all.
+\renewcommand*{\namefont}{\fontsize{34}{36}\bfseries\upshape}
+\colorlet{firstnamecolor}{color1}
+\colorlet{lastnamecolor}{color1}
+\colorlet{namecolor}{color1}
 \renewcommand*{\sectionstyle}[1]{{\sectionfont\color{color1}#1}}
 
 \usepackage[utf8]{inputenc}
-\usepackage{hyperref}
-\hypersetup{
+% pdflatex fallback only (the documented engine is lualatex, which skips this
+% branch). Without T1 font encoding pdflatex builds accented letters with
+% \accent, and the PDF text layer stores them decomposed - `e` + U+0300 rather
+% than U+00E8 - so an ATS keyword match on "Genève" fails while the page looks
+% right. moderncv 2.5 loads T1 itself under pdflatex; 2.3.1 (Debian/Ubuntu apt)
+% does not. \ifpdftex comes from iftex, which every moderncv version loads.
+\ifpdftex\usepackage[T1]{fontenc}\fi
+% moderncv loads hyperref itself in an \AtEndPreamble hook, so \hypersetup
+% must go in an \AtEndPreamble of our own: on moderncv < 2.4 a top-level
+% \usepackage{hyperref} clashes with the class's own
+% \RequirePackage[unicode]{hyperref}. From 2.4.0 the class passes its options
+% through \PassOptionsToPackage instead, which is what removes that clash.
+\AtEndPreamble{\hypersetup{
     colorlinks=true,
     linkcolor=blue,
     filecolor=magenta,
     urlcolor=blue,
     pdftitle={[YOUR_NAME] - CV},
-    pdfpagemode=FullScreen,
-}
+    % Keep pdfpagemode=UseNone: this block runs after moderncv's own
+    % \AtEndPreamble (moderncv.cls sets pdfpagemode there), so a FullScreen
+    % value here would win and open every CV in fullscreen presentation mode.
+    pdfpagemode=UseNone,
+}}
 \usepackage[scale=0.80]{geometry}
 \usepackage{import}
 
 % personal data
 \name{[First]}{[Last]}
+% If you have no address to list, DELETE this whole line. \address{}{}{} fails
+% with "There's no line here to end" on every moderncv version.
 \address{[Your Address, City, Country]}{}{}
 \phone[mobile]{[+XX XXXXXXXXXX]}
 \email{[your.email@example.com]}
@@ -77,31 +98,31 @@
 \begin{itemize}
 
 % --- Most Recent Role ---
-\item{\cventry{[YYYY--Present]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+\item{\cventry{[YYYY-Present]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
 \begin{itemize}
-    \item [Achievement or responsibility 1 - be specific, use numbers where possible]
-    \item [Achievement or responsibility 2]
-    \item [Achievement or responsibility 3]
-    \item [Achievement or responsibility 4]
+    \item {[Achievement or responsibility 1 - be specific, use numbers where possible]}
+    \item {[Achievement or responsibility 2]}
+    \item {[Achievement or responsibility 3]}
+    \item {[Achievement or responsibility 4]}
 \end{itemize}}}
 
 \vspace{3pt}
 
 % --- Previous Role ---
-\item{\cventry{[YYYY--YYYY]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+\item{\cventry{[YYYY-YYYY]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
 \begin{itemize}
-    \item [Achievement or responsibility 1]
-    \item [Achievement or responsibility 2]
-    \item [Achievement or responsibility 3]
+    \item {[Achievement or responsibility 1]}
+    \item {[Achievement or responsibility 2]}
+    \item {[Achievement or responsibility 3]}
 \end{itemize}}}
 
 \vspace{3pt}
 
 % --- Earlier Role ---
-\item{\cventry{[YYYY--YYYY]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
+\item{\cventry{[YYYY-YYYY]}{[Job Title]}{[Company]}{[City, Country]}{}{\vspace{1pt}
 \begin{itemize}
-    \item [Achievement or responsibility 1]
-    \item [Achievement or responsibility 2]
+    \item {[Achievement or responsibility 1]}
+    \item {[Achievement or responsibility 2]}
 \end{itemize}}}
 
 \end{itemize}
@@ -114,13 +135,13 @@
 \vspace{1pt}
 \begin{itemize}
 
-\item{\cventry{[YYYY--YYYY]}{[Degree] in [Field]}{[Institution]}{[City, Country]}{}{\vspace{1pt}
+\item{\cventry{[YYYY-YYYY]}{[Degree] in [Field]}{[Institution]}{[City, Country]}{}{\vspace{1pt}
 Thesis: ``[Thesis Title].'' [Brief description of research focus.]
 }}
 
 \vspace{3pt}
 
-\item{\cventry{[YYYY--YYYY]}{[Degree] in [Field]}{[Institution]}{[City, Country]}{}{\vspace{1pt}
+\item{\cventry{[YYYY-YYYY]}{[Degree] in [Field]}{[Institution]}{[City, Country]}{}{\vspace{1pt}
 [Brief description or key topics.]
 }}
 
@@ -133,7 +154,7 @@ Thesis: ``[Thesis Title].'' [Brief description of research focus.]
 \section{Languages}
 \vspace{1pt}
 \begin{itemize}
-\item [Language 1] (native), [Language 2] (fluent), [Language 3] (intermediate).
+\item {[Language 1] (native), [Language 2] (fluent), [Language 3] (intermediate).}
 \end{itemize}
 
 % ============================================================
@@ -143,7 +164,7 @@ Thesis: ``[Thesis Title].'' [Brief description of research focus.]
 \section{Publications}
 \vspace{1pt}
 \begin{itemize}
-\item [Author(s)] ([Year]). [Title]. [Journal/Conference]. \href{[DOI_URL]}{DOI link}
+\item {[Author(s)] ([Year]). [Title]. [Journal/Conference]. \href{[DOI_URL]}{DOI link}}
 \end{itemize}
 
 % ============================================================

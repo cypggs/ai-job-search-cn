@@ -13,7 +13,7 @@ export const categories = defineCommand({
   name: "categories",
   description: "List all job categories with live counts",
   options: {
-    limit: option(z.coerce.number().optional(), {
+    limit: option(z.coerce.number().int().min(1).optional(), {
       description: "Cap number of categories returned",
     }),
     format: option(z.enum(["json", "table", "plain"]).default("json"), {

@@ -6,7 +6,7 @@ CLI for [Akademikernes Jobbank](https://jobbank.dk) — Denmark's job portal for
 - **RSS feed**: `https://jobbank.dk/job/rss?{params}` — 100 items max, all search filters work
 - **Job detail**: `https://jobbank.dk/job/{id}/` — JSON-LD (`Schema.org JobPosting`) embedded in page HTML
 
-**Authentication**: None required. A browser User-Agent header is required to bypass bot protection.
+**Authentication**: None required. A browser User-Agent header is sent, but Jobbank may still block automated requests with Cloudflare bot protection. In that case the CLI exits with a clear error and callers should use a WebSearch fallback rather than retrying.
 **Format**: RSS XML (search), HTML with embedded JSON-LD (detail).
 
 ---
@@ -247,6 +247,7 @@ bun run src/cli.ts search --education 24 --suitable-for 2 --since 2026-03-01
       "description": "Fuldtidsjob hos Novo Nordisk, Bagsværd (Ansøgningsfrist: 12.04.2026)",
       "url": "https://jobbank.dk/job/1234567/novo-nordisk/senior-data-scientist",
       "posted": "2026-03-02T00:00:00+01:00",
+      "date": "2026-03-02",
       "deadline": "2026-04-12"
     }
   ]
@@ -265,7 +266,8 @@ bun run src/cli.ts search --education 24 --suitable-for 2 --since 2026-03-01
 | `description` | string | Raw RSS description field (single-line summary) |
 | `url` | string | Full URL to job posting |
 | `posted` | string | Publication date in ISO 8601 |
-| `deadline` | string \| null | Application deadline as `DD.MM.YYYY` string, or `null` if "løbende" / not present |
+| `date` | string \| null | Publication date as `YYYY-MM-DD` (derived from `posted`), or `null` if absent |
+| `deadline` | string \| null | Application deadline as `YYYY-MM-DD` (converted from the feed's `DD.MM.YYYY`), or `null` if "løbende" / not present |
 
 > `meta.total` is fetched from the HTML page `<title>` in a secondary request (pattern: `"{N} relevante job og karriereopslag"`). If the secondary request fails, `meta.total` is `null`.
 
@@ -342,7 +344,7 @@ All errors are written to **stderr** in JSON format and exit with code `1`:
 
 ```json
 { "error": "Job not found", "code": "NOT_FOUND" }
-{ "error": "Failed to fetch RSS feed: 403 Forbidden", "code": "API_ERROR" }
+{ "error": "Jobbank is blocking automated requests with Cloudflare bot protection. Skip this portal or use the WebSearch fallback.", "code": "API_ERROR" }
 { "error": "No JSON-LD found on job page", "code": "PARSE_ERROR" }
 { "error": "--key or at least one filter is required", "code": "MISSING_REQUIRED" }
 ```
@@ -353,11 +355,13 @@ All errors are written to **stderr** in JSON format and exit with code `1`:
 
 ### User-Agent
 
-All HTTP requests must include a browser User-Agent header. Without it, Jobbank routes traffic through a bot protection layer that returns invalid responses:
+All HTTP requests include a browser User-Agent header:
 
 ```
 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 ```
+
+This is not guaranteed to bypass Cloudflare bot protection. If Jobbank returns a Cloudflare challenge page, the CLI reports that condition and callers should skip the portal or use a WebSearch fallback.
 
 ### RSS description parsing
 

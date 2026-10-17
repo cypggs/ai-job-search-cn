@@ -10,16 +10,16 @@ export const search = defineCommand({
       short: "q",
       description: "Keyword search query (e.g. python, grafisk designer)",
     }),
-    page: option(z.coerce.number().default(1), {
+    page: option(z.coerce.number().int().min(1).default(1), {
       description: "Page number (1-indexed)",
     }),
-    jobage: option(z.coerce.number().default(9999), {
+    jobage: option(z.coerce.number().int().min(1).default(9999), {
       description: "Max age of posting in days: 1, 7, 14, 30, or 9999 (all)",
     }),
     sort: option(z.string().default("score"), {
       description: "Sort order: score (relevance) or date (newest first)",
     }),
-    limit: option(z.coerce.number().optional(), {
+    limit: option(z.coerce.number().int().min(1).optional(), {
       description: "Cap total results returned by the CLI (client-side)",
     }),
     format: option(z.enum(["json", "table", "plain"]).default("json"), {

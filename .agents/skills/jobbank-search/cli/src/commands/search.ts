@@ -1,6 +1,30 @@
 import { defineCommand, option } from "@bunli/core"
 import { z } from "zod"
-import { rssFetch, fetchWithUA, writeError, parseRssDescription, extractJobIdFromUrl, BASE_URL } from "../helpers.js"
+import { rssFetch, fetchWithUA, writeError, parseRssDescription, extractJobIdFromUrl, BASE_URL, type RssItem } from "../helpers.js"
+
+export function normalizeSearchItem(item: RssItem): Record<string, unknown> {
+  const parsed = parseRssDescription(item.description)
+  const id = extractJobIdFromUrl(item.link)
+  // Guard the parse: new Date(<unparseable>) is an Invalid Date whose
+  // toISOString() throws RangeError, and this runs inside an unguarded
+  // items.map() - one bad feed item would kill the whole search as
+  // API_ERROR (#416). An unparseable pubDate degrades to the same shape
+  // as an absent one: posted "", date null.
+  const parsedDate = item.pubDate ? new Date(item.pubDate) : null
+  const posted = parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : ""
+  return {
+    id,
+    title: item.title,
+    company: parsed.company,
+    location: parsed.location,
+    jobType: parsed.jobType,
+    description: item.description,
+    url: item.link,
+    posted,
+    date: posted ? posted.slice(0, 10) : null,
+    deadline: parsed.deadline,
+  }
+}
 
 export const search = defineCommand({
   name: "search",
@@ -30,7 +54,7 @@ export const search = defineCommand({
     "suitable-for": option(z.union([z.string(), z.array(z.string())]).optional(), {
       description: "Suitable-for code (andet). Repeatable.",
     }),
-    company: option(z.coerce.number().optional(), {
+    company: option(z.coerce.number().int().min(1).optional(), {
       description: "Company ID (virk)",
     }),
     remote: option(z.string().optional(), {
@@ -39,7 +63,7 @@ export const search = defineCommand({
     since: option(z.string().optional(), {
       description: "Posted on or after date, format YYYY-MM-DD (oprettet)",
     }),
-    limit: option(z.coerce.number().optional(), {
+    limit: option(z.coerce.number().int().min(1).optional(), {
       description: "Cap total results returned by CLI (client-side)",
     }),
     format: option(z.enum(["json", "table", "plain"]).default("json"), {
@@ -134,22 +158,7 @@ export const search = defineCommand({
       }
 
       // Normalize items
-      let results = items.map((item) => {
-        const parsed = parseRssDescription(item.description)
-        const id = extractJobIdFromUrl(item.link)
-        const posted = item.pubDate ? new Date(item.pubDate).toISOString() : ""
-        return {
-          id,
-          title: item.title,
-          company: parsed.company,
-          location: parsed.location,
-          jobType: parsed.jobType,
-          description: item.description,
-          url: item.link,
-          posted,
-          deadline: parsed.deadline,
-        }
-      })
+      let results = items.map(normalizeSearchItem)
 
       // Apply limit
       if (flags.limit !== undefined) {
