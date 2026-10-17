@@ -14,7 +14,8 @@ import unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-README = REPO / "README.md"
+README = REPO / "README.md"  # Chinese README is the repo homepage
+README_EN = REPO / "README_EN.md"
 SETUP_GUIDE = REPO / "SETUP.md"
 SETUP_COMMAND = REPO / ".claude" / "commands" / "setup.md"
 
@@ -48,9 +49,18 @@ class TestForkWarningsAtTheDecisionPoint(unittest.TestCase):
         )
 
     def test_readme_quick_start_warns_next_to_the_fork_command(self):
-        body = section(README.read_text(encoding="utf-8"), "### 1. Fork and clone")
+        body = section(README_EN.read_text(encoding="utf-8"), "### 1. Fork and clone")
         self.assertIn("gh repo fork", body, "sanity: the fork command lives in this section")
-        self.assert_warns(body, "README")
+        self.assert_warns(body, "README_EN")
+
+    def test_chinese_readme_quick_start_warns_next_to_the_fork_command(self):
+        """README.md is the Chinese homepage; the same warning must live at the
+        same decision point in Chinese (公开仓库 / 个人信息 / 第 8 节)."""
+        body = section(README.read_text(encoding="utf-8"), "### 1. Fork 并克隆")
+        self.assertIn("gh repo fork", body, "sanity: the fork command lives in this section")
+        self.assertIn("公开", body, "中文版 fork 章节必须说明 fork 是公开的")
+        self.assertIn("个人信息", body, "中文版 fork 章节必须说明 /setup 会把个人信息写入被跟踪的文件")
+        self.assertIn("第 8 节", body, "中文版 fork 章节必须指向 SETUP.md 第 8 节的私有仓库方案")
 
     def test_setup_guide_warns_next_to_the_fork_command(self):
         body = section(SETUP_GUIDE.read_text(encoding="utf-8"), "## 2. Fork and clone")
