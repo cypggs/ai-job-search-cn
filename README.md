@@ -175,6 +175,10 @@ python3 tools/upstream_triage.py          # 把落后的提交分成"值得看"�
 - [Mikkel Krogholm](https://github.com/mikkelkrogsholm) 的招聘 CLI 技能
 - 基于 [Claude Code](https://claude.com/claude-code) 构建
 
+## 支持这个项目
+
+如果这个框架帮你省下了一个改简历的周末、或者帮你拿到了 offer，欢迎到[爱发电](https://ifdian.net/a/cypggs)请我喝杯咖啡 ☕，你的支持会让我更有动力持续跟进上游、维护这个中国版。
+
 ## License
 
 MIT

@@ -415,4 +415,6 @@ Thinking about a PR? Read [CONTRIBUTING.md](CONTRIBUTING.md) first - it explains
 
 ## License
 
+This China-market fork is maintained by [cypggs](https://github.com/cypggs). If this fork helps your job search, you can [buy him a coffee on ifdian](https://ifdian.net/a/cypggs) ☕
+
 MIT
